@@ -1,0 +1,40 @@
+/* Profile */
+export { default as ProfilePage } from "./Profile/ProfilePage";
+/* Location */
+export { default as AddLocationPage } from "./Locations/AddLocationPage";
+/* Home */
+export { default as NewHomePage } from "./Home/NewHomePage";
+/* Menu */
+export { default as MenuPage } from "./Menu/MenuPage";
+export { default as NewMenuPage } from "./Menu/NewMenuPage";
+
+/* Deals */
+export { default as DealsPage } from "./Deals/DealsPage";
+/* Favorites */
+export { default as FavoritesPage } from "./Favorites/FavoritesPage";
+/* ContactUs */
+export { default as ContactUsPage } from "./ContactUs/ContactusPage";
+/* Details Id */
+export { default as ProductDetails } from "./Product/ProductDetails";
+/* Cart */
+export { default as CartPage } from "./Cart/CartPage";
+/* CheckOut */
+export { default as CheckOutPage } from "./CheckOut/CheckOutPage";
+/* Orders */
+export { default as OrdersPage } from "./Orders/OrdersPage";
+export { default as UpComingOrders } from "./Orders/Sections/UpComingOrders";
+export { default as HistoryOrders } from "./Orders/Sections/HistoryOrders";
+export { default as OrderTraking } from "./Orders/Sections/OrderTraking";
+
+/* Not Found Page */
+export { default as NotFoundPage } from "./SuppPages/NotFoundPage";
+export { default as MaintenancePage } from "./SuppPages/MaintenancePage";
+
+/* Banners */
+export { default as Banners } from "./Menu/Sections/Banners";
+
+/* Branch */
+export { default as Branch } from "./Branch/Branch";
+
+//Landing Page
+export { default as LandingPage } from "./Home/LandingPage";
