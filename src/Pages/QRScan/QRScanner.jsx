@@ -1,48 +1,48 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Square, CheckCircle, XCircle } from 'lucide-react';
-import jsQR from 'jsqr'; // Import jsQR
+import jsQR from 'jsqr';
 
 const QRScannerPage = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [scannedData, setScannedData] = useState('');
   const [error, setError] = useState('');
+  const [scanFeedback, setScanFeedback] = useState('');
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const scanIntervalRef = useRef(null);
 
-  // QR Code detection function using jsQR
   const detectQRCode = () => {
-    if (!videoRef.current || !canvasRef.current) {
-      return null;
-    }
+    if (!videoRef.current || !canvasRef.current) return null;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
 
     try {
-      // Check if video is ready
-      if (videoRef.current.readyState !== 4) {
-        return null;
-      }
+      if (videoRef.current.readyState !== 4) return null;
 
-      // Set canvas size to match video
-      canvas.width = videoRef.current.videoWidth || 640;
-      canvas.height = videoRef.current.videoHeight || 480;
+      canvas.width = Math.min(videoRef.current.videoWidth || 640, 1280);
+      canvas.height = Math.min(videoRef.current.videoHeight || 480, 720);
 
-      // Draw the current video frame to canvas
       ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      const contrastFactor = 1.5;
 
-      // Use jsQR to detect and decode the QR code
+      for (let i = 0; i < data.length; i += 4) {
+        const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        const adjusted = Math.min(255, Math.max(0, (gray - 128) * contrastFactor + 128));
+        data[i] = data[i + 1] = data[i + 2] = adjusted;
+      }
+      ctx.putImageData(imageData, 0, 0);
+
       const qrCode = jsQR(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: 'dontInvert', // Optimize for performance
+        inversionAttempts: 'attemptBoth',
       });
 
       if (qrCode && qrCode.data) {
-        return qrCode.data; // Return the actual decoded QR code data
+        return qrCode.data;
       }
-
       return null;
     } catch (err) {
       console.error('QR detection error:', err);
@@ -54,6 +54,7 @@ const QRScannerPage = () => {
     try {
       setError('');
       setScannedData('');
+      setScanFeedback('');
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('Camera not supported by this browser');
@@ -63,13 +64,13 @@ const QRScannerPage = () => {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: 'environment', // Back camera
-            width: { ideal: 640 },
-            height: { ideal: 480 },
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
           },
         });
       } catch (backCameraError) {
-        console.log('Back camera failed, trying front camera:', backCameraError);
+        console.log('High-res camera failed, trying fallback:', backCameraError);
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             width: { ideal: 640 },
@@ -105,9 +106,15 @@ const QRScannerPage = () => {
                 stopScanning();
               }
             }
-          }, 100);
+          }, 50);
         }
       }, 500);
+
+      setTimeout(() => {
+        if (isScanning && !scannedData) {
+          setScanFeedback('Move closer to the QR code or improve lighting');
+        }
+      }, 5000);
     } catch (err) {
       console.error('Camera error details:', err);
       let errorMessage = 'Camera access failed. ';
@@ -119,8 +126,6 @@ const QRScannerPage = () => {
         errorMessage += 'Camera not supported by this browser.';
       } else if (err.name === 'NotReadableError') {
         errorMessage += 'Camera is being used by another application.';
-      } else if (err.message.includes('not supported')) {
-        errorMessage += 'Your browser does not support camera access.';
       } else {
         errorMessage += `Error: ${err.message}`;
       }
@@ -130,6 +135,7 @@ const QRScannerPage = () => {
 
   const stopScanning = () => {
     setIsScanning(false);
+    setScanFeedback('');
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -143,6 +149,13 @@ const QRScannerPage = () => {
   const resetScanner = () => {
     setScannedData('');
     setError('');
+    setScanFeedback('');
+  };
+
+  const handleVideoClick = () => {
+    if (videoRef.current) {
+      videoRef.current.focus();
+    }
   };
 
   useEffect(() => {
@@ -201,16 +214,21 @@ const QRScannerPage = () => {
                   ref={videoRef}
                   autoPlay
                   playsInline
+                  onClick={handleVideoClick}
                   className="w-full h-64 object-cover rounded-lg border-4 border-blue-200"
                 />
                 <canvas ref={canvasRef} className="hidden" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="border-2 border-blue-500 w-48 h-48 rounded-lg animate-pulse"></div>
+                  <div className="border-4 border-blue-500 w-64 h-64 rounded-lg bg-transparent opacity-50"></div>
                 </div>
+                <p className="absolute bottom-2 left-0 right-0 text-white text-sm bg-black bg-opacity-50 py-1">
+                  Align QR code within the square
+                </p>
               </div>
               <div className="text-blue-600 mb-4">
                 <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2"></div>
                 <p>Scanning for QR codes...</p>
+                {scanFeedback && <p className="text-red-500 text-sm">{scanFeedback}</p>}
               </div>
               <button
                 onClick={stopScanning}
