@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { QrReader } from 'react-qr-reader';
 import { useDispatch } from 'react-redux';
 
 const QRScanner = () => {
   const [result, setResult] = useState('No result');
-  const [isScanning, setIsScanning] = useState(false);
+  const [isScanning, setIsScanning] = useState(true); // Start scanning automatically
+  const dispatch = useDispatch();
 
   const handleScan = (data) => {
     if (data) {
@@ -18,33 +19,20 @@ const QRScanner = () => {
     setResult(`Error: ${err.message}`);
   };
 
-  const startScanning = () => {
-    setIsScanning(true);
-  };
-
   const stopScanning = () => {
     setIsScanning(false);
   };
 
+  // Optional: Ensure scanning starts on mount (if not using initial state)
+  useEffect(() => {
+    setIsScanning(true);
+    return () => setIsScanning(false); // Cleanup on unmount
+  }, []);
+
   return (
     <div style={{ padding: '20px', textAlign: 'center' }}>
       <h2>QR Code Scanner</h2>
-      {!isScanning ? (
-        <button
-          onClick={startScanning}
-          style={{
-            padding: '10px 20px',
-            fontSize: '16px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-        >
-          Scan QR Code
-        </button>
-      ) : (
+      {isScanning ? (
         <>
           <QrReader
             delay={300}
@@ -69,6 +57,21 @@ const QRScanner = () => {
             Stop Scanning
           </button>
         </>
+      ) : (
+        <button
+          onClick={() => setIsScanning(true)}
+          style={{
+            padding: '10px 20px',
+            fontSize: '16px',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+          }}
+        >
+          Restart Scanning
+        </button>
       )}
       <p style={{ marginTop: '20px' }}>Scanned Result: {result}</p>
     </div>
