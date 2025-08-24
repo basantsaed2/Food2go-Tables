@@ -3,5 +3,8 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  optimizeDeps: {
+    include: ['jsqr'], // Explicitly include jsQR for pre-bundling
+  },
   assetsInclude: "**/*.Jsx",
 });
