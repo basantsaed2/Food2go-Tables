@@ -1,15 +1,12 @@
-// QRScanner.jsx
 import React, { useState } from "react";
-import { QrReader } from "react-qr-reader";
+import QrReader from "react-qr-scanner";
 
 const QRScanner = () => {
-  const [startScan, setStartScan] = useState(false);
-  const [result, setResult] = useState("");
+  const [data, setData] = useState("No result");
 
-  const handleScan = (data) => {
-    if (data) {
-      setResult(data?.text || data); // save QR result
-      setStartScan(false); // stop camera after success
+  const handleScan = (result) => {
+    if (result) {
+      setData(result.text);
     }
   };
 
@@ -17,41 +14,36 @@ const QRScanner = () => {
     console.error(err);
   };
 
-  return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
-      {!startScan ? (
-        <button
-          onClick={() => setStartScan(true)}
-          style={{
-            padding: "10px 20px",
-            fontSize: "16px",
-            cursor: "pointer",
-          }}
-        >
-          Start QR Scan
-        </button>
-      ) : (
-        <div style={{ width: "300px", margin: "20px auto" }}>
-          <QrReader
-            constraints={{ facingMode: "environment" }}
-            onResult={(result, error) => {
-              if (!!result) {
-                handleScan(result);
-              }
-              if (!!error) {
-                handleError(error);
-              }
-            }}
-            style={{ width: "100%" }}
-          />
-        </div>
-      )}
+  const previewStyle = {
+    height: 300,
+    width: 300,
+    position: "relative",
+  };
 
-      {result && (
-        <div style={{ marginTop: "20px", fontSize: "18px" }}>
-          <strong>QR Result:</strong> {result}
-        </div>
-      )}
+  return (
+    <div className="flex flex-col items-center justify-center">
+      <div style={previewStyle}>
+        <QrReader
+          delay={300}
+          onError={handleError}
+          onScan={handleScan}
+          style={{ height: "100%", width: "100%" }}
+        />
+        {/* Overlay square */}
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            width: "200px",
+            height: "200px",
+            border: "3px solid red",
+            transform: "translate(-50%, -50%)",
+            boxSizing: "border-box",
+          }}
+        ></div>
+      </div>
+      <p className="mt-4">Result: {data}</p>
     </div>
   );
 };
