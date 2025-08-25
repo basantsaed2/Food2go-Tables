@@ -28,6 +28,11 @@ const QRScanner = () => {
           onError={handleError}
           onScan={handleScan}
           style={{ height: "100%", width: "100%" }}
+          constraints={{
+            video: {
+              facingMode: { exact: "environment" }, // Force back camera
+            },
+          }}
         />
         {/* Overlay square */}
         <div
