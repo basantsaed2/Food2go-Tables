@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import mainLogo from '../../assets/Images/mainLogo.jpeg'
 import { Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,7 @@ const LandingPage = () => {
     const [searchParams] = useSearchParams();
     const tableId = searchParams.get("table_id");
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (tableId) {
             dispatch(setTableId(tableId));
         }
@@ -22,6 +22,8 @@ const LandingPage = () => {
     const mainData = useSelector(state => state.mainData?.data);
     const companyInfo = useSelector(state => state.maintenance?.data);
     const selectedLanguage = useSelector((state) => state.language?.selected ?? 'en');
+    const reduxTableId = useSelector(state => state.table?.data);
+    const effectiveTableId = tableId || reduxTableId;
 
     return (
         <div className="w-full mt-1 md:mt-10 max-h-screen flex flex-col gap-4 items-center justify-center overflow-hidden">
@@ -35,19 +37,19 @@ const LandingPage = () => {
                             {selectedLanguage === "en" ? mainData?.name : mainData?.ar_name}
                         </h1>
 
-                        {/* {tableId && ( */}
-                        <div className="flex items-center gap-4 relative z-10">
-                            <div className="flex items-center justify-center w-12 h-12 bg-thirdColor rounded-xl shadow-inner group-hover:rotate-12 transition-transform">
-                                <MdTableBar className="text-mainColor text-2xl" />
-                            </div>
-                            <div className="flex gap-2 items-center ">
-                                <span className="text-3xl font-bold text-gray-600">{t("table")} :</span>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-3xl font-black text-mainColor leading-none">{tableId}</span>
+                        {effectiveTableId && (
+                            <div className="flex items-center gap-4 relative z-10">
+                                <div className="flex items-center justify-center w-12 h-12 bg-thirdColor rounded-xl shadow-inner group-hover:rotate-12 transition-transform">
+                                    <MdTableBar className="text-mainColor text-2xl" />
+                                </div>
+                                <div className="flex gap-2 items-center ">
+                                    <span className="text-3xl font-bold text-gray-600">{t("table")} :</span>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-black text-mainColor leading-none">{effectiveTableId}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        {/* )} */}
+                        )}
                     </div>
                 </div>
 
@@ -81,10 +83,12 @@ const LandingPage = () => {
                                 )}
                             </Link>
 
-                            <Link to="/call_waiter" className="bg-thirdColor flex flex-col gap-3 items-center justify-center rounded-xl p-4 md:p-6 transition-transform hover:scale-105">
-                                <MdRoomService size={86} className="text-mainColor" />
-                                <h1 className="text-xl md:text-2xl text-mainColor text-center">{t("callWaiter")}</h1>
-                            </Link>
+                            {effectiveTableId && (
+                                <Link to="/call_waiter" className="bg-thirdColor flex flex-col gap-3 items-center justify-center rounded-xl p-4 md:p-6 transition-transform hover:scale-105">
+                                    <MdRoomService size={86} className="text-mainColor" />
+                                    <h1 className="text-xl md:text-2xl text-mainColor text-center">{t("callWaiter")}</h1>
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </div>

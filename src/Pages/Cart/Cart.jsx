@@ -12,6 +12,7 @@ import { usePost } from '../../Hooks/usePost';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../Context/Auth';
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -29,6 +30,7 @@ const Cart = () => {
   const { postData: postOrder, loading: loadingPostOrder, response: orderResponse, error: orderError } = usePost({
     url: `${import.meta.env.VITE_API_BASE_URL}/client/order/dine_in_order`,
   });
+  const auth = useAuth();
 
   const cart = useSelector(state => state.cart);
   const [orderSummary, setOrderSummary] = useState({
@@ -220,9 +222,20 @@ const Cart = () => {
   };
 
   const onConfirmOrder = () => {
-    postOrder(prepareOrderData(), "order placed successfully!");
+    postOrder(prepareOrderData());
     setShowConfirmDialog(false);
   };
+
+  useEffect(() => {
+    if (orderResponse && !loadingPostOrder && orderResponse.status === 200) {
+      auth.toastSuccess(t('order placed successfully!'));
+      dispatch(clearCart());
+      navigate('/', { replace: true });
+    } else if (orderError) {
+      auth.toastError(t(orderError.message || 'Failed to place order. Please try again.'));
+    }
+  }, [orderResponse, orderError, auth, t, dispatch]);
+
 
   return (
     <div className="w-full p-4 md:p-6 xl:p-8">
