@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, ShoppingCart, Heart, User, Phone, MapPin, Globe, Star, ChefHat, LogOut, Settings, Package, ShoppingBag } from 'lucide-react';
+import { Menu, X, ShoppingCart, Heart, User, Phone, MapPin, Globe, Star, ChefHat, LogOut, Settings, Package, ShoppingBag, Clock } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setLanguage, setLanguages } from '../Store/Slices/languageSlice';
 import { useTranslation } from 'react-i18next';
@@ -75,6 +75,11 @@ const Navbar = () => {
             icon: MdRoomService,
             i18nKey: 'callWaiter',
             path: '/call_waiter'
+        },
+        {
+            icon: Clock,
+            i18nKey: 'orderTracking',
+            path: '/my_orders'
         }] : []),
         ...(companyInfo?.company_info?.order_online === 1 ? [{
             icon: ShoppingCart,

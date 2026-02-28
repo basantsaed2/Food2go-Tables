@@ -14,6 +14,7 @@ import ElectronicMenuLanding from "./Pages/ElectronicMenu/ElectronicMenuLanding"
 import ProtectedOrderRoute from "./ProtectedData/ProtectedOrderRoute";
 import CallWaiter from "./Pages/CallWaiter/CallWaiter";
 import QRScanner from "./Pages/QRScan/QRScanner";
+import MyOrderTracking from "./Pages/OrderTracking/MyOrderTracking";
 
 export const router = createBrowserRouter(
   [
@@ -83,6 +84,10 @@ export const router = createBrowserRouter(
             {
               path: "call_waiter",
               element: <CallWaiter />
+            },
+            {
+              path: "my_orders",
+              element: <MyOrderTracking />
             },
           ]
         },
